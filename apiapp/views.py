@@ -24,6 +24,17 @@ class BookListView(generics.ListAPIView):
         language=self.request.query_params.get('language', None)
         mime_type=self.request.query_params.get('mime_type', None)
         topic=self.request.query_params.get('topic', None)
+        author=self.request.query_params.get('author', None)
+        # if author:
+        #     name = BooksAuthor.objects.filter(name=author)
+
+        #     for na in name:
+        #         book_id=BooksBookAuthors.objects.filter(author_id=na.id).values('book_id')
+        #         print("book_id",book_id)
+        #     book_id_list = [x['book_id'] for x in book_id]
+        #     print(book_id_list)
+        #     filter['id__in']=book_id_list
+        #     print(filter)
         if book_id:
             # gutenberg_id = BooksBook.objects.get(gutenberg_id=book_id).id
             filter['id']= book_id
@@ -52,21 +63,21 @@ class BookListView(generics.ListAPIView):
         if topic:
             top1_list=[]
             top2_list=[]
-            topic_data1 = BooksSubject.objects.filter(name__icontains =topic)
-            print(topic_data1.query)
-            for top1 in topic_data1:
-                shelv_topic = BooksBookBookshelves.objects.filter(bookshelf_id=top1.id)
-                
-                for s_t in shelv_topic:
-                    top1_list.append(s_t.book_id)
+            top=topic.split(',')
+            for topic in top:
+                topic_data1 = BooksSubject.objects.filter(name__icontains =topic)
+                print(topic_data1.query)
+                for top1 in topic_data1:
+                    shelv_topic = BooksBookBookshelves.objects.filter(bookshelf_id=top1.id)
+                    for s_t in shelv_topic:
+                        top1_list.append(s_t.book_id)
 
-            topic_data2 = BooksBookshelf.objects.filter(name__icontains =topic)
-            print(topic_data2.query)
-            for top2 in topic_data2:
-                subject_topic = BooksBookSubjects.objects.filter(subject_id=top2.id)
-                
-                for s_t in subject_topic:
-                    top2_list.append(s_t.book_id)
+                topic_data2 = BooksBookshelf.objects.filter(name__icontains =topic)
+                print(topic_data2.query)
+                for top2 in topic_data2:
+                    subject_topic = BooksBookSubjects.objects.filter(subject_id=top2.id)
+                    for s_t in subject_topic:
+                        top2_list.append(s_t.book_id)
 
             book_id = list(set(top1_list+top2_list))
             # print('book_id',book_id)
@@ -84,7 +95,7 @@ class BookListView(generics.ListAPIView):
             return self.queryset
 
 
-
+    # @response_modify_decorator_list_after_execution
     def get(self,request,*args,**kwargs):
         response = super(BookListView,self).get(self,request,args,kwargs)
         # mime_type=self.request.query_params.get('mime_type', None)
